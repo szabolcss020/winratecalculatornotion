@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Winrate Calculator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #191919;
+    color: #e8e8e8;
+    padding: 16px;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 0;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  .num {
+    width: 72px;
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 5px;
+    padding: 5px 8px;
+    font-size: 13px;
+    color: #e8e8e8;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.15s;
+  }
+  .num:focus { outline: none; border-color: #555; }
+  .num::placeholder { color: #444; }
+  .sep { color: #444; font-size: 13px; }
+  .result {
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 52px;
+    color: #555;
+    transition: color 0.2s;
+  }
+  .result.good { color: #3ecf8e; }
+  .result.mid  { color: #f0a429; }
+  .result.bad  { color: #e05252; }
+  .del {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #444;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .del:hover { color: #e05252; }
+  .add-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    background: none;
+    border: 1px dashed #3a3a3a;
+    border-radius: 5px;
+    color: #555;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    padding: 6px 12px;
+    cursor: pointer;
+    width: 100%;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .add-btn:hover { border-color: #555; color: #aaa; }
+</style>
+</head>
+<body>
+
+<div id="rows"></div>
+<button class="add-btn" onclick="addRow()">+ Új sor</button>
+
+<script>
+let count = 0;
+
+function colorClass(pct) {
+  if (isNaN(pct)) return "";
+  if (pct >= 50) return "good";
+  if (pct >= 35) return "mid";
+  return "bad";
+}
+
+function addRow() {
+  const id = count++;
+  const container = document.getElementById("rows");
+  const div = document.createElement("div");
+  div.className = "row";
+  div.id = `row-${id}`;
+  div.innerHTML = `
+    <input class="num" type="number" min="0" placeholder="Win" id="w-${id}">
+    <span class="sep">/</span>
+    <input class="num" type="number" min="0" placeholder="Total" id="t-${id}">
+    <span class="sep">=</span>
+    <span class="result" id="r-${id}">—</span>
+    <button class="del" onclick="document.getElementById('row-${id}').remove()">×</button>
+  `;
+  container.appendChild(div);
+
+  const wEl = document.getElementById(`w-${id}`);
+  const tEl = document.getElementById(`t-${id}`);
+  const rEl = document.getElementById(`r-${id}`);
+
+  function calc() {
+    const w = parseFloat(wEl.value);
+    const t = parseFloat(tEl.value);
+    if (!isNaN(w) && !isNaN(t) && t > 0) {
+      const pct = (w / t) * 100;
+      rEl.textContent = pct.toFixed(1) + "%";
+      rEl.className = "result " + colorClass(pct);
+    } else {
+      rEl.textContent = "—";
+      rEl.className = "result";
+    }
+  }
+  wEl.addEventListener("input", calc);
+  tEl.addEventListener("input", calc);
+}
+
+addRow();
+addRow();
+addRow();
+</script>
+</body>
+</html>
