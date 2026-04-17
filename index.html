@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Winrate Calculator</title>
+<title>Winrate Calculator - Saved</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,9 +42,12 @@
     color: #555;
     transition: color 0.2s;
   }
-  .result.good { color: #3ecf8e; }
-  .result.mid  { color: #f0a429; }
-  .result.bad  { color: #e05252; }
+  /* Frissített színskála */
+  .result.green  { color: #3ecf8e; } /* 50%+ */
+  .result.blue   { color: #3b82f6; } /* 40-50% */
+  .result.yellow { color: #f0a429; } /* 35-40% */
+  .result.red    { color: #e05252; } /* 0-35% */
+  
   .del {
     margin-left: auto;
     background: none;
@@ -79,31 +82,74 @@
 <body>
 
 <div id="rows"></div>
-<button class="add-btn" onclick="addRow()">+ Új sor</button>
+<button class="add-btn" onclick="addNewRow()">+ Új sor</button>
 
 <script>
-let count = 0;
+let rowCounter = 0;
 
+// ÚJ SZÍNSKÁLA LOGIKA
 function colorClass(pct) {
   if (isNaN(pct)) return "";
-  if (pct >= 50) return "good";
-  if (pct >= 35) return "mid";
-  return "bad";
+  if (pct >= 50) return "green";
+  if (pct >= 40) return "blue";
+  if (pct >= 35) return "yellow";
+  return "red";
 }
 
-function addRow() {
-  const id = count++;
+// MENTÉS FUNKCIÓ
+function saveToStorage() {
+  const rowsData = [];
+  document.querySelectorAll('.row').forEach(row => {
+    const id = row.id.replace('row-', '');
+    const w = document.getElementById(`w-${id}`).value;
+    const t = document.getElementById(`t-${id}`).value;
+    rowsData.push({ w, t });
+  });
+  localStorage.setItem('notionWinrateData', JSON.stringify(rowsData));
+}
+
+// BETÖLTÉS FUNKCIÓ
+function loadFromStorage() {
+  const saved = localStorage.getItem('notionWinrateData');
+  if (saved) {
+    const rowsData = JSON.parse(saved);
+    if (rowsData.length > 0) {
+      rowsData.forEach(data => addRow(data.w, data.t));
+    } else {
+      setupDefaultRows();
+    }
+  } else {
+    setupDefaultRows();
+  }
+}
+
+function setupDefaultRows() {
+  addRow(); addRow(); addRow();
+}
+
+function deleteRow(id) {
+  document.getElementById(`row-${id}`).remove();
+  saveToStorage();
+}
+
+function addNewRow() {
+  addRow();
+  saveToStorage();
+}
+
+function addRow(valW = "", valT = "") {
+  const id = rowCounter++;
   const container = document.getElementById("rows");
   const div = document.createElement("div");
   div.className = "row";
   div.id = `row-${id}`;
   div.innerHTML = `
-    <input class="num" type="number" min="0" placeholder="Win" id="w-${id}">
+    <input class="num" type="number" min="0" placeholder="Win" id="w-${id}" value="${valW}">
     <span class="sep">/</span>
-    <input class="num" type="number" min="0" placeholder="Total" id="t-${id}">
+    <input class="num" type="number" min="0" placeholder="Total" id="t-${id}" value="${valT}">
     <span class="sep">=</span>
     <span class="result" id="r-${id}">—</span>
-    <button class="del" onclick="document.getElementById('row-${id}').remove()">×</button>
+    <button class="del" onclick="deleteRow(${id})">×</button>
   `;
   container.appendChild(div);
 
@@ -122,14 +168,18 @@ function addRow() {
       rEl.textContent = "—";
       rEl.className = "result";
     }
+    saveToStorage();
   }
+
   wEl.addEventListener("input", calc);
   tEl.addEventListener("input", calc);
+  
+  // Első számítás betöltéskor, ha vannak adatok
+  if(valW !== "" || valT !== "") calc();
 }
 
-addRow();
-addRow();
-addRow();
+// Start
+loadFromStorage();
 </script>
 </body>
 </html>
