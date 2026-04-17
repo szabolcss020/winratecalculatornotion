@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Winrate Calculator - Saved</title>
+<title>Winrate Calculator - Multi-Storage</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,23 +30,20 @@
     color: #e8e8e8;
     text-align: center;
     font-family: 'Inter', sans-serif;
-    transition: border-color 0.15s;
   }
   .num:focus { outline: none; border-color: #555; }
-  .num::placeholder { color: #444; }
   .sep { color: #444; font-size: 13px; }
   .result {
     font-size: 14px;
     font-weight: 600;
     min-width: 52px;
     color: #555;
-    transition: color 0.2s;
   }
-  /* Frissített színskála */
-  .result.green  { color: #3ecf8e; } /* 50%+ */
-  .result.blue   { color: #3b82f6; } /* 40-50% */
-  .result.yellow { color: #f0a429; } /* 35-40% */
-  .result.red    { color: #e05252; } /* 0-35% */
+  /* 4 fokozatú színskála */
+  .result.green  { color: #3ecf8e; } 
+  .result.blue   { color: #3b82f6; } 
+  .result.yellow { color: #f0a429; } 
+  .result.red    { color: #e05252; } 
   
   .del {
     margin-left: auto;
@@ -55,28 +52,18 @@
     color: #444;
     font-size: 16px;
     cursor: pointer;
-    padding: 0 4px;
-    line-height: 1;
-    transition: color 0.15s;
   }
-  .del:hover { color: #e05252; }
   .add-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
     margin-top: 12px;
     background: none;
     border: 1px dashed #3a3a3a;
     border-radius: 5px;
     color: #555;
     font-size: 13px;
-    font-family: 'Inter', sans-serif;
     padding: 6px 12px;
     cursor: pointer;
     width: 100%;
-    transition: border-color 0.15s, color 0.15s;
   }
-  .add-btn:hover { border-color: #555; color: #aaa; }
 </style>
 </head>
 <body>
@@ -85,9 +72,13 @@
 <button class="add-btn" onclick="addNewRow()">+ Új sor</button>
 
 <script>
+// --- ID KEZELÉS ---
+const urlParams = new URLSearchParams(window.location.search);
+const tableId = urlParams.get('id') || 'default'; 
+const storageKey = 'winrateData_' + tableId; 
+
 let rowCounter = 0;
 
-// ÚJ SZÍNSKÁLA LOGIKA
 function colorClass(pct) {
   if (isNaN(pct)) return "";
   if (pct >= 50) return "green";
@@ -96,7 +87,6 @@ function colorClass(pct) {
   return "red";
 }
 
-// MENTÉS FUNKCIÓ
 function saveToStorage() {
   const rowsData = [];
   document.querySelectorAll('.row').forEach(row => {
@@ -105,12 +95,11 @@ function saveToStorage() {
     const t = document.getElementById(`t-${id}`).value;
     rowsData.push({ w, t });
   });
-  localStorage.setItem('notionWinrateData', JSON.stringify(rowsData));
+  localStorage.setItem(storageKey, JSON.stringify(rowsData));
 }
 
-// BETÖLTÉS FUNKCIÓ
 function loadFromStorage() {
-  const saved = localStorage.getItem('notionWinrateData');
+  const saved = localStorage.getItem(storageKey);
   if (saved) {
     const rowsData = JSON.parse(saved);
     if (rowsData.length > 0) {
@@ -173,12 +162,9 @@ function addRow(valW = "", valT = "") {
 
   wEl.addEventListener("input", calc);
   tEl.addEventListener("input", calc);
-  
-  // Első számítás betöltéskor, ha vannak adatok
   if(valW !== "" || valT !== "") calc();
 }
 
-// Start
 loadFromStorage();
 </script>
 </body>
