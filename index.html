@@ -7,22 +7,12 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  
   body {
     font-family: 'Inter', sans-serif;
     background: #191919;
     color: #e8e8e8;
-    overflow-x: hidden;
+    padding: 16px;
   }
-
-  /* Ez a rész felel a pontos elhelyezésért */
-  #main-container {
-    padding-top: 25px; /* Állítsd be pontosan oda, ahol a Notion sorod kezdődik */
-    padding-left: 16px;
-    padding-right: 16px;
-    padding-bottom: 20px;
-  }
-
   .row {
     display: flex;
     align-items: center;
@@ -30,10 +20,8 @@
     padding: 7px 0;
     border-bottom: 1px solid #2a2a2a;
   }
-
   .num {
     width: 72px;
-    height: 28px;
     background: #2a2a2a;
     border: 1px solid #3a3a3a;
     border-radius: 5px;
@@ -43,7 +31,6 @@
     text-align: center;
     font-family: 'Inter', sans-serif;
   }
-
   .num:focus { outline: none; border-color: #555; }
   .sep { color: #444; font-size: 13px; }
   .result {
@@ -52,7 +39,7 @@
     min-width: 52px;
     color: #555;
   }
-
+  /* 4 fokozatú színskála */
   .result.green  { color: #3ecf8e; } 
   .result.blue   { color: #3b82f6; } 
   .result.yellow { color: #f0a429; } 
@@ -66,7 +53,6 @@
     font-size: 16px;
     cursor: pointer;
   }
-
   .add-btn {
     margin-top: 12px;
     background: none;
@@ -82,13 +68,11 @@
 </head>
 <body>
 
-<div id="main-container">
-  <div id="rows"></div>
-  <button class="add-btn" onclick="addNewRow()">+ Új sor</button>
-</div>
+<div id="rows"></div>
+<button class="add-btn" onclick="addNewRow()">+ Új sor</button>
 
 <script>
-// A teljes script marad, amit eddig használtál
+// --- ID KEZELÉS ---
 const urlParams = new URLSearchParams(window.location.search);
 const tableId = urlParams.get('id') || 'default'; 
 const storageKey = 'winrateData_' + tableId; 
