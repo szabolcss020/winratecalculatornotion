@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Winrate Calculator - Multi-Storage</title>
+<title>Winrate Calculator</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -11,13 +11,33 @@
     font-family: 'Inter', sans-serif;
     background: #191919;
     color: #e8e8e8;
-    padding: 16px 16px 0 16px; /* 60px top = Notion header magassága */
+    padding: 0 16px;
+  }
+  #offset-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px dashed #333;
+    margin-bottom: 0;
+  }
+  #offset-bar label { font-size: 11px; color: #555; white-space: nowrap; }
+  #offset-slider { flex: 1; accent-color: #3b82f6; }
+  #offset-val { font-size: 11px; color: #3b82f6; width: 30px; }
+  #save-offset {
+    font-size: 11px;
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 4px;
+    color: #3ecf8e;
+    padding: 2px 6px;
+    cursor: pointer;
   }
   .row {
     display: flex;
     align-items: center;
     gap: 8px;
-    height: 45px;
+    padding: 7px 0;
     border-bottom: 1px solid #2a2a2a;
   }
   .num {
@@ -43,7 +63,6 @@
   .result.blue   { color: #3b82f6; }
   .result.yellow { color: #f0a429; }
   .result.red    { color: #e05252; }
-
   .del {
     margin-left: auto;
     background: none;
@@ -67,6 +86,13 @@
 </head>
 <body>
 
+<div id="offset-bar">
+  <label>Eltolás:</label>
+  <input type="range" id="offset-slider" min="0" max="120" value="0">
+  <span id="offset-val">0px</span>
+  <button id="save-offset">💾 Ment</button>
+</div>
+
 <div id="rows"></div>
 <button class="add-btn" onclick="addNewRow()">+ Új sor</button>
 
@@ -74,8 +100,28 @@
 const urlParams = new URLSearchParams(window.location.search);
 const tableId = urlParams.get('id') || 'default';
 const storageKey = 'winrateData_' + tableId;
+const offsetKey = 'winrateOffset_' + tableId;
 
 let rowCounter = 0;
+
+// Offset betöltése
+const savedOffset = parseInt(localStorage.getItem(offsetKey) || '0');
+const slider = document.getElementById('offset-slider');
+const offsetVal = document.getElementById('offset-val');
+slider.value = savedOffset;
+offsetVal.textContent = savedOffset + 'px';
+document.body.style.paddingTop = savedOffset + 'px';
+
+slider.addEventListener('input', () => {
+  const v = slider.value;
+  offsetVal.textContent = v + 'px';
+  document.body.style.paddingTop = v + 'px';
+});
+
+document.getElementById('save-offset').addEventListener('click', () => {
+  localStorage.setItem(offsetKey, slider.value);
+  offsetVal.textContent = slider.value + 'px ✓';
+});
 
 function colorClass(pct) {
   if (isNaN(pct)) return "";
@@ -110,7 +156,6 @@ function loadFromStorage() {
       setupDefaultRows();
     }
   } catch (e) {
-    console.warn('Storage hiba:', e);
     setupDefaultRows();
   }
 }
