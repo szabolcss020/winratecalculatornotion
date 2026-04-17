@@ -11,13 +11,13 @@
     font-family: 'Inter', sans-serif;
     background: #191919;
     color: #e8e8e8;
-    padding: 16px;
+    padding: 0 16px; /* top padding 0 – Notion tetejétől indul */
   }
   .row {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 7px 0;
+    height: 45px;          /* fix magasság = Notion sor magassága */
     border-bottom: 1px solid #2a2a2a;
   }
   .num {
@@ -39,12 +39,11 @@
     min-width: 52px;
     color: #555;
   }
-  /* 4 fokozatú színskála */
-  .result.green  { color: #3ecf8e; } 
-  .result.blue   { color: #3b82f6; } 
-  .result.yellow { color: #f0a429; } 
-  .result.red    { color: #e05252; } 
-  
+  .result.green  { color: #3ecf8e; }
+  .result.blue   { color: #3b82f6; }
+  .result.yellow { color: #f0a429; }
+  .result.red    { color: #e05252; }
+
   .del {
     margin-left: auto;
     background: none;
@@ -72,10 +71,9 @@
 <button class="add-btn" onclick="addNewRow()">+ Új sor</button>
 
 <script>
-// --- ID KEZELÉS ---
 const urlParams = new URLSearchParams(window.location.search);
-const tableId = urlParams.get('id') || 'default'; 
-const storageKey = 'winrateData_' + tableId; 
+const tableId = urlParams.get('id') || 'default';
+const storageKey = 'winrateData_' + tableId;
 
 let rowCounter = 0;
 
@@ -99,15 +97,20 @@ function saveToStorage() {
 }
 
 function loadFromStorage() {
-  const saved = localStorage.getItem(storageKey);
-  if (saved) {
-    const rowsData = JSON.parse(saved);
-    if (rowsData.length > 0) {
-      rowsData.forEach(data => addRow(data.w, data.t));
+  try {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      const rowsData = JSON.parse(saved);
+      if (rowsData.length > 0) {
+        rowsData.forEach(data => addRow(data.w, data.t));
+      } else {
+        setupDefaultRows();
+      }
     } else {
       setupDefaultRows();
     }
-  } else {
+  } catch (e) {
+    console.warn('Storage hiba, alapértelmezett sorok betöltése:', e);
     setupDefaultRows();
   }
 }
@@ -162,7 +165,7 @@ function addRow(valW = "", valT = "") {
 
   wEl.addEventListener("input", calc);
   tEl.addEventListener("input", calc);
-  if(valW !== "" || valT !== "") calc();
+  if (valW !== "" || valT !== "") calc();
 }
 
 loadFromStorage();
