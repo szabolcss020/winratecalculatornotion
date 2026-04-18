@@ -11,27 +11,17 @@
     font-family: 'Inter', sans-serif;
     background: #191919;
     color: #e8e8e8;
-    padding: 0 16px;
+    padding: 6px 16px;
   }
-  #offset-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 0;
-    border-bottom: 1px dashed #333;
-    margin-bottom: 0;
-  }
-  #offset-bar label { font-size: 11px; color: #555; white-space: nowrap; }
-  #offset-slider { flex: 1; accent-color: #3b82f6; }
-  #offset-val { font-size: 11px; color: #3b82f6; width: 30px; }
-  #save-offset {
+  h2 {
     font-size: 11px;
-    background: #2a2a2a;
-    border: 1px solid #3a3a3a;
-    border-radius: 4px;
-    color: #3ecf8e;
-    padding: 2px 6px;
-    cursor: pointer;
+    color: #444;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 4px 0 6px;
+    border-bottom: 1px dashed #2a2a2a;
+    margin-bottom: 0;
   }
   .row {
     display: flex;
@@ -81,18 +71,13 @@
     padding: 6px 12px;
     cursor: pointer;
     width: 100%;
+    display: block;
   }
 </style>
 </head>
 <body>
 
-<div id="offset-bar">
-  <label>Eltolás:</label>
-  <input type="range" id="offset-slider" min="0" max="120" value="0">
-  <span id="offset-val">0px</span>
-  <button id="save-offset">💾 Ment</button>
-</div>
-
+<h2>Winrate Calculator</h2>
 <div id="rows"></div>
 <button class="add-btn" onclick="addNewRow()">+ Új sor</button>
 
@@ -100,28 +85,8 @@
 const urlParams = new URLSearchParams(window.location.search);
 const tableId = urlParams.get('id') || 'default';
 const storageKey = 'winrateData_' + tableId;
-const offsetKey = 'winrateOffset_' + tableId;
 
 let rowCounter = 0;
-
-// Offset betöltése
-const savedOffset = parseInt(localStorage.getItem(offsetKey) || '0');
-const slider = document.getElementById('offset-slider');
-const offsetVal = document.getElementById('offset-val');
-slider.value = savedOffset;
-offsetVal.textContent = savedOffset + 'px';
-document.body.style.paddingTop = savedOffset + 'px';
-
-slider.addEventListener('input', () => {
-  const v = slider.value;
-  offsetVal.textContent = v + 'px';
-  document.body.style.paddingTop = v + 'px';
-});
-
-document.getElementById('save-offset').addEventListener('click', () => {
-  localStorage.setItem(offsetKey, slider.value);
-  offsetVal.textContent = slider.value + 'px ✓';
-});
 
 function colorClass(pct) {
   if (isNaN(pct)) return "";
@@ -139,7 +104,7 @@ function saveToStorage() {
     const t = document.getElementById(`t-${id}`).value;
     rowsData.push({ w, t });
   });
-  localStorage.setItem(storageKey, JSON.stringify(rowsData));
+  try { localStorage.setItem(storageKey, JSON.stringify(rowsData)); } catch(e) {}
 }
 
 function loadFromStorage() {
@@ -149,12 +114,10 @@ function loadFromStorage() {
       const rowsData = JSON.parse(saved);
       if (rowsData.length > 0) {
         rowsData.forEach(data => addRow(data.w, data.t));
-      } else {
-        setupDefaultRows();
+        return;
       }
-    } else {
-      setupDefaultRows();
     }
+    setupDefaultRows();
   } catch (e) {
     setupDefaultRows();
   }
