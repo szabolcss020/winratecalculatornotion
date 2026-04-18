@@ -86,11 +86,6 @@ const urlParams = new URLSearchParams(window.location.search);
 const tableId = urlParams.get('id') || 'default';
 const storageKey = 'winrateData_' + tableId;
 
-const customHeight = urlParams.get('h');
-if (customHeight) {
-  document.body.style.minHeight = customHeight + 'px';
-}
-
 let rowCounter = 0;
 
 function colorClass(pct) {
