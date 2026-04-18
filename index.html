@@ -7,11 +7,12 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
+  html, body {
     font-family: 'Inter', sans-serif;
     background: #191919;
     color: #e8e8e8;
     padding: 6px 16px;
+    overflow: hidden;
   }
   h2 {
     font-size: 14px;
@@ -72,6 +73,7 @@
     cursor: pointer;
     width: 100%;
     display: block;
+    margin-bottom: 12px;
   }
 </style>
 </head>
@@ -87,6 +89,15 @@ const tableId = urlParams.get('id') || 'default';
 const storageKey = 'winrateData_' + tableId;
 
 let rowCounter = 0;
+
+function updateHeight() {
+  const h = document.body.scrollHeight;
+  document.documentElement.style.height = h + 'px';
+  document.body.style.minHeight = h + 'px';
+  try {
+    window.parent.postMessage({ type: 'setHeight', height: h }, '*');
+  } catch(e) {}
+}
 
 function colorClass(pct) {
   if (isNaN(pct)) return "";
@@ -105,6 +116,7 @@ function saveToStorage() {
     rowsData.push({ w, t });
   });
   try { localStorage.setItem(storageKey, JSON.stringify(rowsData)); } catch(e) {}
+  updateHeight();
 }
 
 function loadFromStorage() {
@@ -114,6 +126,7 @@ function loadFromStorage() {
       const rowsData = JSON.parse(saved);
       if (rowsData.length > 0) {
         rowsData.forEach(data => addRow(data.w, data.t));
+        setTimeout(updateHeight, 100);
         return;
       }
     }
@@ -121,6 +134,7 @@ function loadFromStorage() {
   } catch (e) {
     setupDefaultRows();
   }
+  setTimeout(updateHeight, 100);
 }
 
 function setupDefaultRows() {
